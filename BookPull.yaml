@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: ESPN NFL Odds API
+  description: Fetch NFL odds and win probabilities for a specific NFL game using ESPN's API.
+  version: 1.0.0
+servers:
+  - url: https://sports.core.api.espn.com
+    description: ESPN Core API server
+paths:
+  /v2/sports/football/leagues/nfl/events/{event_id}/competitions/{competition_id}/odds:
+    get:
+      operationId: fetchNFLOdds
+      summary: Fetch NFL odds and win probabilities for a specific NFL game.
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: The unique ID of the NFL event (game).
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          description: The unique ID of the competition.
+          schema:
+            type: string
+        - name: team_id
+          in: query
+          required: false
+          description: The ID of the NFL team.
+          schema:
+            type: string
+        - name: year
+          in: query
+          required: false
+          description: The NFL season year.
+          schema:
+            type: integer
+        - name: data_type
+          in: query
+          required: true
+          description: The type of data to fetch: 'odds', 'statistics', or 'win_probability'.
+          schema:
+            type: string
+            enum:
+              - odds
+              - statistics
+              - win_probability
+      responses:
+        '200':
+          description: Successful response with NFL odds data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_id:
+                    type: string
+                    description: The ID of the game.
+                    example: "40123456789"
+                  team_id:
+                    type: string
+                    description: The ID of the team.
+                    example: "12"
+                  odds:
+                    type: object
+                    properties:
+                      win_probability:
+                        type: number
+                        description: The win probability for the team.
+                        example: 0.75
+                      spread:
+                        type: number
+                        description: The point spread for the game.
+                        example: -3.5
+                      moneyline:
+                        type: number
+                        description: The moneyline odds for the game.
+                        example: 150
+                      over_under:
+                        type: number
+                        description: The over/under total for the game.
+                        example: 48.5
+                    required:
+                      - win_probability
+                      - spread
+                      - moneyline
+                      - over_under
+                required:
+                  - event_id
+                  - team_id
+                  - odds
+        '400':
+          description: Invalid request, missing required parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message explaining the invalid request.
+                    example: "Invalid request: Missing required parameter event_id"
+        '404':
+          description: NFL game not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message explaining that the game was not found.
+                    example: "NFL game not found"
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message explaining the server issue.
+                    example: "Internal server error"
